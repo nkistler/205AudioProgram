@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import glob, re, os
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3
+from mutagen.id3 import ID3, TCON
 
 def play():
     return
@@ -21,9 +21,12 @@ def select():
     #perform search
     for entry in homeDirList:
     	if re.search(r'.mp3', entry):
+            genreTag = ID3(homeDir + entry).getall('TCON')
+            artistTag = ID3(homeDir + entry).getall('TPE1') + ID3(homeDir + entry).getall('TPE1')
+            if "Blues" in [genreTag[0]]:
+                print "Success!"
             allFileNamesList.insert(totalNumberOfFiles, entry)
 	    totalNumberOfFiles=totalNumberOfFiles+1
-            print ID3(homeDir + entry).pprint()
     return
     
 
