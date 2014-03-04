@@ -24,9 +24,15 @@ def select():
             genreTag = ID3(homeDir + entry).getall('TCON')
             artistTag = ID3(homeDir + entry).getall('TPE1') + ID3(homeDir + entry).getall('TPE1')
             if genre in [genreTag[0]]:
-                print "Success!"
-            allFileNamesList.insert(totalNumberOfFiles, entry)
-	    totalNumberOfFiles=totalNumberOfFiles+1
+                allFileNamesList.insert(totalNumberOfFiles, entry)
+	        totalNumberOfFiles=totalNumberOfFiles+1
+            if artist in [artistTag[0]]:
+                allFileNamesList.insert(totalNumberOfFiles, entry)
+	        totalNumberOfFiles=totalNumberOfFiles+1
+            if artist in [artistTag[1]]:
+                allFileNamesList.insert(totalNumberOfFiles, entry)
+	        totalNumberOfFiles=totalNumberOfFiles+1
+            print allFileNamesList
     return
     
 
