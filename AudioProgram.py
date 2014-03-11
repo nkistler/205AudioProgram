@@ -3,19 +3,47 @@ import glob, re, os, random, pygame
 from pygame.locals import *
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
+
+#global variables
+allFileNamesSet= set()
+randomizedSample = set()
+homeDir = "/home/nathan/workspace/AudioProgram/Audio/"
+homeDirList = os.listdir(homeDir)
+selection = ""
+
+#initialize globals
+for entry in homeDirList:
+    if re.search(r'.mp3', entry):
+        allFileNamesSet.add(entry)
+print allFileNamesSet
 pygame.init()
 pygame.mixer.init()
 
 def generate():
      #randomize the sample of music
     randomizedSample = random.sample(allFileNamesSet, len(allFileNamesSet))
+
+    #print playlist
     print "Playlist:"
     for item in reversed(randomizedSample):
         print item
-    pygame.mixer.music.load("Audio/" + randomizedSample.pop())
+
+    #localize variable
+    selection = ""
+
+    #start playback and ask for next input
     while len(randomizedSample) > 0:
-        pygame.mixer.music.queue("Audio/" + randomizedSample.pop())
-    pygame.mixer.music.play(0)
+        pygame.mixer.music.load("Audio/" + randomizedSample.pop())
+        pygame.mixer.music.play(0)
+        while pygame.mixer.music.get_busy():
+            selection = raw_input("Please enter command: ")
+            if selection=='stop':
+                pygame.mixer.music.stop()
+                return
+            elif selection=='next':
+                break    
+            else:
+                print "Invalid selection"   
     return
 
 def select():
@@ -39,19 +67,6 @@ def select():
                 allFileNamesSet.add(entry)
     print allFileNamesSet
     return
-
-#global variables
-allFileNamesSet= set()
-randomizedSample = set()
-homeDir = "/home/nathan/workspace/AudioProgram/Audio/"
-homeDirList = os.listdir(homeDir)
-selection = ""
-
-#initialize globals
-for entry in homeDirList:
-    if re.search(r'.mp3', entry):
-        allFileNamesSet.add(entry)
-print allFileNamesSet
 
 #main program loop
 while selection.strip() != 'quit':
