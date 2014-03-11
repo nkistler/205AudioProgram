@@ -3,51 +3,7 @@ import glob, re, os, random, pygame, sys, Buttons
 from pygame.locals import *
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
-
-class AudioPlayer:
-    def __init__(self):
-        self.main()
-    
-    #Create a display
-    def display(self):
-        self.screen = pygame.display.set_mode((650,370),0,32)
-        pygame.display.set_caption("Audio Player")
-
-    #Update the display and show the button
-    def update_display(self):
-        self.screen.fill((30,144,255))
-        #Parameters: surface, color, x, y, length, height, width, text, text_color
-        self.Button1.create_button(self.screen, (107,142,35), 150, 135, 100, 50, 0, "Play", (255,255,255))    
-        self.Button2.create_button(self.screen, (107,142,35), 275, 135, 100, 50, 0, "Skip", (255,255,255))
-        self.Button3.create_button(self.screen, (107,142,35), 400, 135, 100, 50, 0, "Stop", (255,255,255))
-        pygame.display.flip()
-
-
-    #Run the loop
-    def main(self):
-        self.Button1 = Buttons.Button()
-        self.Button2 = Buttons.Button()
-        self.Button3 = Buttons.Button()
-        self.display()
-        while True:
-            self.update_display()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                elif event.type == MOUSEBUTTONDOWN:
-                    if self.Button1.pressed(pygame.mouse.get_pos()):
-                        while len(randomizedSample) > 0: 
-                            #Play the file
-                            pygame.init()
-                            pygame.mixer.init()
-                            pygame.mixer.music.load("Audio/" + randomizedSample.pop())
-                            pygame.mixer.music.play(0)
-                            print "Play"
-                    elif self.Button2.pressed(pygame.mouse.get_pos()):
-                        print "Skip"
-                    elif self.Button3.pressed(pygame.mouse.get_pos()):
-                        print "Stop"
-
+pygame.init()
 
 def generate():
      #randomize the sample of music
@@ -56,11 +12,15 @@ def generate():
     print "Playlist:"
     for item in reversed(randomizedSample):
         print item
+    while len(randomizedSample) > 0:
+        play(randomizedSample.pop())
+    return
 
-    #initialize GUI
-    if __name__ == '__main__':
-        obj = AudioPlayer()
-    return   
+def play(fileName):
+    #Play the file
+    pygame.mixer.init() 
+    pygame.mixer.music.load("Audio/" + fileName)
+    pygame.mixer.music.play(0) 
 
 def select():
     #take input
