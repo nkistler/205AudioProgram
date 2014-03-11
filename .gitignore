@@ -2,3 +2,6 @@
 *.mp3
 *.wav
 *.flac
+
+# Temporary Files
+*~
