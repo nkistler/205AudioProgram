@@ -1,9 +1,10 @@
 #!/usr/bin/python
-import glob, re, os, random, pygame, sys
+import glob, re, os, random, pygame
 from pygame.locals import *
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
 pygame.init()
+pygame.mixer.init()
 
 def generate():
      #randomize the sample of music
@@ -18,14 +19,19 @@ def generate():
 
 def play(fileName):
     #Play the file
-    pygame.mixer.init() 
     pygame.mixer.music.load("Audio/" + fileName)
-    pygame.mixer.music.play(1) 
+    pygame.mixer.music.play(0)
+    #Loop needed to prevent outside loop from popping off all of randomizedSample
+    while pygame.mixer.music.get_busy(): 
+        pygame.time.Clock().tick(10)     
 
 def select():
     #take input
     artist = raw_input("Enter Artist name: ")
     genre = raw_input("Enter Genre name: ")
+
+    #empty the current set
+    allFileNamesSet.clear()
 
     #perform search
     for entry in homeDirList:
@@ -64,5 +70,6 @@ while selection.strip() != 'quit':
         generate() #plays files which match current criteria
     elif selection=="2":
         select() #allows user to modify current audio generation criteria
+    elif selection=='quit': { }
     else:
         print "Invalid selection"
