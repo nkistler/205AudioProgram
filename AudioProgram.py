@@ -9,21 +9,14 @@ pygame.mixer.init()
 def generate():
      #randomize the sample of music
     randomizedSample = random.sample(allFileNamesSet, len(allFileNamesSet))
-    
+    print "Playlist:"
+    for item in reversed(randomizedSample):
+        print item
+    pygame.mixer.music.load("Audio/" + randomizedSample.pop())
     while len(randomizedSample) > 0:
-        print "Playlist:"
-        for item in reversed(randomizedSample):
-            print item
-        play(randomizedSample.pop())
-    return
-
-def play(fileName):
-    #Play the file
-    pygame.mixer.music.load("Audio/" + fileName)
+        pygame.mixer.music.queue("Audio/" + randomizedSample.pop())
     pygame.mixer.music.play(0)
-    #Loop needed to prevent outside loop from popping off all of randomizedSample
-    while pygame.mixer.music.get_busy(): 
-        pygame.time.Clock().tick(10)     
+    return
 
 def select():
     #take input
