@@ -9,7 +9,7 @@ from mutagen.id3 import ID3
 selectedFilePathsSet= set()
 userArtistList = []
 userGenreList = []
-homeDir = "/home/nathan/workspace/AudioProgram/Audio" #DO NOT include trailing slash
+homeDir = "/home/nathan/Music" #DO NOT include trailing slash
 homeDirList = list()
 selection = ""
 
@@ -115,15 +115,24 @@ def select():
 #getters and setters
 def getArtistTag(pathName):
     artistTag = ID3(pathName).getall('TPE1')
-    return str(artistTag[0])
+    if (artistTag):
+        return str(artistTag[0])
+    else:
+        return ""
 
 def getGenreTag(pathName):
     genreTag = ID3(pathName).getall('TCON')
-    return str(genreTag[0])
+    if (genreTag):
+        return str(genreTag[0])
+    else:
+        return ""
 
 def getTitleTag(pathName):
     titleTag = ID3(pathName).getall('TIT2')
-    return str(titleTag[0])
+    if (titleTag):
+        return str(titleTag[0])
+    else:
+        return ""
 
 #main program loop
 while selection.strip().lower() != 'quit':
