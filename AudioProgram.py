@@ -6,8 +6,8 @@ from mutagen.id3 import ID3
 
 #global variables
 allFileNamesSet= set()
-artistList = []
-genreList = []
+userArtistList = []
+userGenreList = []
 homeDir = "/home/nathan/workspace/AudioProgram/Audio/"
 homeDirList = os.listdir(homeDir)
 selection = ""
@@ -19,6 +19,7 @@ for entry in homeDirList:
 pygame.init()
 pygame.mixer.init()
 
+#main functions
 def play():
      #randomize the sample of music
     randomizedSample = set()
@@ -27,7 +28,11 @@ def play():
     #print playlist
     print "Playlist:"
     for item in reversed(randomizedSample):
-        print item
+        #get ID3 tags from file
+        artistTag = getArtistTag(item)
+        titleTag = getTitleTag(item)
+        genreTag = getGenreTag(item)
+        print artistTag + ", " + titleTag + ", " + genreTag
 
     #localize variable
     selection = ""
@@ -47,7 +52,8 @@ def play():
                 if len(randomizedSample) == 0:
                     print "Error: End of playlist"
                 else:
-                    print "Current track: " + randomizedSample[len(randomizedSample)-1]
+                    nameOfCurrentFile = randomizedSample[len(randomizedSample)-1]
+                    print "Current track: " + nameOfCurrentFile
                     break
             elif selection.strip().lower()=='quit':
                 sys.exit()
@@ -62,14 +68,14 @@ def select():
     while artist.strip().lower() != 'done':
         artist = raw_input("Enter artist name or enter command \"done\": ")
         if artist.strip().lower() != 'done':
-            artistList.append(artist.strip().lower())
+            userArtistList.append(artist.strip().lower())
     while genre.strip().lower() != 'done':
         genre = raw_input("Enter genre name or enter command \"done\": ")
         if genre.strip().lower() != 'done':
-            genreList.append(genre.strip().lower())
+            userGenreList.append(genre.strip().lower())
     print "Current preferences:"
-    print artistList
-    print genreList
+    print userArtistList
+    print userGenreList
 
     #empty the current set
     allFileNamesSet.clear()
@@ -79,20 +85,31 @@ def select():
         #check if the file is in fact an audio file
     	if re.search(r'.mp3', entry):
             #get ID3 tags from file
-            artistTags = ID3(homeDir + entry).getall('TPE1') + ID3(homeDir + entry).getall('TPE1')
-            genreTags = ID3(homeDir + entry).getall('TCON')
-            artistTag1 = str(artistTags[0])
-            artistTag2 = str(artistTags[1])
-            genreTag1 = str(genreTags[0])
+            artistTag = getArtistTag(entry)
+            genreTag = getGenreTag(entry)
 
             #check tags against user created lists
-            for item in artistList:
-                if item in (artistTag1.lower(), artistTag2.lower()):
+            for item in userArtistList:
+                if (re.search(item, artistTag.lower())): # Need to fix this, possibly has something to do with paces?
                     allFileNamesSet.add(entry)
-            for item in genreList:
-                if item in (genreTag1.lower()):
+            for item in userGenreList:
+                if re.search(item, genreTag.lower()):
                     allFileNamesSet.add(entry)
     return
+
+#getters and setters
+def getArtistTag(fileName):
+    artistTag = ID3(homeDir + fileName).getall('TPE1')
+    return str(artistTag[0])
+
+def getGenreTag(fileName):
+    genreTag = ID3(homeDir + fileName).getall('TCON')
+    return str(genreTag[0])
+
+def getTitleTag(fileName):
+    titleTag = ID3(homeDir + fileName).getall('TIT2')
+    return str(titleTag[0])
+    
 
 #main program loop
 while selection.strip().lower() != 'quit':
