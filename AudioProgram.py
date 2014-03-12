@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import glob, re, os, random, pygame
+import re, os, random, pygame
 from pygame.locals import *
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
@@ -15,7 +15,6 @@ selection = ""
 for entry in homeDirList:
     if re.search(r'.mp3', entry):
         allFileNamesSet.add(entry)
-print allFileNamesSet
 pygame.init()
 pygame.mixer.init()
 
@@ -33,51 +32,73 @@ def generate():
 
     #start playback and ask for next input
     while len(randomizedSample) > 0:
-        pygame.mixer.music.load("Audio/" + randomizedSample.pop())
+        pygame.mixer.music.load(homeDir + randomizedSample.pop())
         pygame.mixer.music.play(0)
         while pygame.mixer.music.get_busy():
+            print "Enter command \"stop\" to stop player, or \"next\" to skip to next track."
             selection = raw_input("Please enter command: ")
+            print "You entered ", selection
             if selection=='stop':
                 pygame.mixer.music.stop()
                 return
             elif selection=='next':
-                break    
+                if len(randomizedSample) == 0:
+                    print "Error: End of playlist"
+                else:
+                    print "Current track: " + randomizedSample[len(randomizedSample)-1]
+                    break
             else:
-                print "Invalid selection"   
+                print "Error: Invalid command"   
     return
 
 def select():
     #take input
-    artist = raw_input("Enter Artist name: ")
-    genre = raw_input("Enter Genre name: ")
+    artist = ""
+    genre = ""
+    artistList = []
+    genreList = []
+    while artist != 'done':
+        artist = raw_input("Enter artist name or enter command \"done\": ")
+        if artist != 'done':
+            artistList.append(artist)
+    while genre != 'done':
+        genre = raw_input("Enter genre name or enter command \"done\": ")
+        if genre != 'done':
+            genreList.append(genre)
+    print "Current preferences:"
+    print artistList
+    print genreList
 
     #empty the current set
     allFileNamesSet.clear()
 
     #perform search
     for entry in homeDirList:
+        #check if the file is in fact an audio file
     	if re.search(r'.mp3', entry):
-            genreTag = ID3(homeDir + entry).getall('TCON')
+            #get ID3 tags from file
             artistTag = ID3(homeDir + entry).getall('TPE1') + ID3(homeDir + entry).getall('TPE1')
-            if genre in [genreTag[0]]:
-                allFileNamesSet.add(entry) 
-            if artist in [artistTag[0]]:
-                allFileNamesSet.add(entry)
-            if artist in [artistTag[1]]:
-                allFileNamesSet.add(entry)
-    print allFileNamesSet
+            genreTag = ID3(homeDir + entry).getall('TCON')
+
+            #check tags against user created lists
+            for item in artistList:
+                if item in (artistTag[0], artistTag[1]):
+                    allFileNamesSet.add(entry)
+            for item in genreList:
+                if item in (genreTag[0]):
+                    allFileNamesSet.add(entry)
     return
 
 #main program loop
 while selection.strip() != 'quit':
-    print "Press 1 to generate audio"
-    print "Press 2 to select audio criteria"
+    print "Enter command \"select\" to select music preferences, \"play\" to begin to play music, or \"quit\" to exit the program."
     selection = raw_input("Please enter command: ")
     print "You entered ", selection
-    if selection=="1":
+    if selection=='play':
         generate() #plays files which match current criteria
-    elif selection=="2":
+    elif selection=='select':
         select() #allows user to modify current audio generation criteria
-    elif selection=='quit': { }
+    elif selection=='quit':
+        pass
     else:
-        print "Invalid selection"
+        print "Error: Invalid command"
