@@ -12,6 +12,8 @@ userGenreList = []
 homeDir = "/home/nathan/Music" #DO NOT include trailing slash
 homeDirList = list()
 selection = ""
+volume = 1
+
 
 #initialize globals
 #this starts our audio modules
@@ -38,23 +40,20 @@ def play():
     randomizedSample = random.sample(selectedFilePathsSet, len(selectedFilePathsSet))
 
     #print playlist
-    print "Playlist:"
-    for item in reversed(randomizedSample):
-        #get ID3 tags from file
-        artistTag = getArtistTag(item)
-        titleTag = getTitleTag(item)
-        genreTag = getGenreTag(item)
-        print artistTag + ", " + titleTag + ", " + genreTag
+    printPlaylist(randomizedSample)
 
     #localize variable
     selection = ""
 
     #start playback and ask for next input
     while len(randomizedSample) > 0:
+        printCurrentTrack(randomizedSample[len(randomizedSample)-1])
         pygame.mixer.music.load(randomizedSample.pop())
         pygame.mixer.music.play(0)
+        setVolume(pygame.mixer.music.get_volume())
         while pygame.mixer.music.get_busy():
-            print "Enter command \"stop\" to stop player, \"next\" to skip to next track, or \"quit\" to exit."
+            print "Enter command \"stop\" to stop player, \"next\" to skip to next track, \"up\" to increase volume, \"down\" to decrease volume, or \"quit\" to exit."
+            #Need some way to kill raw input if the track is done playing. This is preventing continuous play.
             selection = raw_input("Please enter command: ")
             print "You entered ", selection
             if selection.strip().lower()=='stop':
@@ -64,12 +63,21 @@ def play():
                 if len(randomizedSample) == 0:
                     print "Error: End of playlist"
                 else:
-                    nameOfCurrentFile = randomizedSample[len(randomizedSample)-1]
-                    artistTag = getArtistTag(nameOfCurrentFile)
-                    titleTag = getTitleTag(nameOfCurrentFile)
-                    genreTag = getGenreTag(nameOfCurrentFile)
-                    print "Current track: " +  artistTag + ", " + titleTag + ", " + genreTag
-                    break
+                    break     
+            elif selection.strip().lower()=='up':
+                if volume == 1:
+                    print "Error: Max volume"
+                else:
+                    setVolume(volume + 0.1)
+                    pygame.mixer.music.set_volume(volume)
+                    print "Volume: " + str(volume*10)
+            elif selection.strip().lower()=='down':
+                if volume == 0:
+                    print "Error: Min volume"
+                else:
+                    setVolume(volume - 0.1)
+                    pygame.mixer.music.set_volume(volume)
+                    print "Volume: " + str(volume*10)
             elif selection.strip().lower()=='quit':
                 sys.exit()
             else:
@@ -133,6 +141,38 @@ def getTitleTag(pathName):
         return str(titleTag[0])
     else:
         return ""
+
+def getVolume():
+    return
+
+def setVolume(vol):
+    global volume
+    if vol>1:
+        volume=1
+    elif vol<0:
+        volume=0
+    else:
+        volume = vol
+    return
+
+#print functions
+def printCurrentTrack(pathName):
+    artistTag = getArtistTag(pathName)
+    titleTag = getTitleTag(pathName)
+    genreTag = getGenreTag(pathName)
+    print "Current track: " +  artistTag + ", " + titleTag + ", " + genreTag
+    return
+
+def printPlaylist(playlist):
+    print "Playlist:"
+    for item in reversed(playlist):
+        #get ID3 tags from file
+        artistTag = getArtistTag(item)
+        titleTag = getTitleTag(item)
+        genreTag = getGenreTag(item)
+        print artistTag + ", " + titleTag + ", " + genreTag
+    return
+
 
 #main program loop
 while selection.strip().lower() != 'quit':
