@@ -14,6 +14,7 @@ userArtistList = []
 userGenreList = []
 homeDir = "/home/nathan/Music" #This is where your music directory is set. DO NOT include trailing slash, and DO include full pathname.x
 homeDirList = list()
+currentTrack = ""
 selection = ""
 volume = 1
 
@@ -46,11 +47,13 @@ def play():
     printPlaylist(randomizedSample)
 
     #localize variable
+    global currentTrack
     selection = ""
 
     #start playback and ask for next input
     while len(randomizedSample) > 0:
-        printCurrentTrack(randomizedSample[len(randomizedSample)-1])
+        setCurrentTrack(randomizedSample[len(randomizedSample)-1])
+        printCurrentTrack(currentTrack)
         pygame.mixer.music.load(randomizedSample.pop())
         pygame.mixer.music.play(0)
         pygame.mixer.music.set_volume(volume)
@@ -58,6 +61,7 @@ def play():
             playerInput(randomizedSample)   
     return
 
+#This function takes input from user to define our selection preferences.
 def select():
     #take input
     artist = ""
@@ -111,7 +115,7 @@ def playerInput(playList):
         pygame.mixer.music.stop()
         main()
     elif selection.strip().lower()=='info':
-        printCurrentTrack(playList[len(playList)-1])
+        printCurrentTrack(currentTrack)
     elif selection.strip().lower()=='next':
         if len(playList) == 0:
             print "Error: End of playlist"
@@ -119,20 +123,14 @@ def playerInput(playList):
             pygame.mixer.music.stop()
             return
     elif selection.strip().lower()=='up':
-        if volume == 1:
-            print "Error: Max volume"
-        else:
-            setVolume(volume + 0.1)
-            pygame.mixer.music.set_volume(volume)
-            print "Volume: " + str(volume*10)
+        setVolume(volume + 0.1)
+        pygame.mixer.music.set_volume(volume)
+        print "Volume: " + str(volume*10)
         playerInput(playList)
     elif selection.strip().lower()=='down':
-        if volume == 0:
-            print "Error: Min volume"
-        else:
-            setVolume(volume - 0.1)
-            pygame.mixer.music.set_volume(volume)
-            print "Volume: " + str(volume*10)
+        setVolume(volume - 0.1)
+        pygame.mixer.music.set_volume(volume)
+        print "Volume: " + str(volume*10)
         playerInput(playList)
     elif selection.strip().lower()=='quit':
         sys.exit()
@@ -165,13 +163,21 @@ def getTitleTag(pathName):
 
 def setVolume(vol):
     global volume
-    if vol>1:
-        volume=1
-    elif vol<0:
-        volume=0
+    if vol>1.0:
+        print "Error: Max volume"
+        volume=1.0
+    elif vol<0.0:
+        print "Error: Min volume"
+        volume=0.0
     else:
         volume = vol
     return
+
+def setCurrentTrack(pathName):
+    global currentTrack
+    currentTrack = pathName
+    return
+    
 
 #print functions
 def printCurrentTrack(pathName):
