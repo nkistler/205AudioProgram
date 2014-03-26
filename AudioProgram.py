@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #needed libraries
-import re, os, sys, random, pygame
+import re, os, pygame, random, sys, time 
 from pygame.locals import *
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
@@ -50,38 +50,9 @@ def play():
         printCurrentTrack(randomizedSample[len(randomizedSample)-1])
         pygame.mixer.music.load(randomizedSample.pop())
         pygame.mixer.music.play(0)
-        setVolume(pygame.mixer.music.get_volume())
+        pygame.mixer.music.set_volume(volume)
         while pygame.mixer.music.get_busy():
-            print "Enter command \"stop\" to stop player, \"next\" to skip to next track, \"up\" to increase volume, \"down\" to decrease volume, or \"quit\" to exit."
-            #Need some way to kill raw input if the track is done playing. This is preventing continuous play.
-            selection = raw_input("Please enter command: ")
-            print "You entered ", selection
-            if selection.strip().lower()=='stop':
-                pygame.mixer.music.stop()
-                return
-            elif selection.strip().lower()=='next':
-                if len(randomizedSample) == 0:
-                    print "Error: End of playlist"
-                else:
-                    break     
-            elif selection.strip().lower()=='up':
-                if volume == 1:
-                    print "Error: Max volume"
-                else:
-                    setVolume(volume + 0.1)
-                    pygame.mixer.music.set_volume(volume)
-                    print "Volume: " + str(volume*10)
-            elif selection.strip().lower()=='down':
-                if volume == 0:
-                    print "Error: Min volume"
-                else:
-                    setVolume(volume - 0.1)
-                    pygame.mixer.music.set_volume(volume)
-                    print "Volume: " + str(volume*10)
-            elif selection.strip().lower()=='quit':
-                sys.exit()
-            else:
-                print "Error: Invalid command"   
+            playerInput(randomizedSample)   
     return
 
 def select():
@@ -120,6 +91,52 @@ def select():
                     selectedFilePathsSet.add(entry)
     return
 
+def playerInput(playList):
+    global volume
+    selection = ""
+    selection = raw_input("Please enter a command (\"help\" will list available commands): ")
+    print "You entered ", selection
+    if selection.strip().lower()=='help':
+        print "\"down\"\tThis command adjusts the volume on the playback down one unit on a ten unit scale."
+        print "\"info\"\tThis command prints out the track information."
+        print "\"next\"\tThis command skips to the next track on the playlist."
+        print "\"quit\"\tThis command exits the program."
+        print "\"stop\"\tThis command stops the playback and destroys the playlist."  
+        print "\"up\"\tThis command adjusts the volume on the playback up one unit on a ten unit scale."     
+    elif selection.strip().lower()=='stop':
+        pygame.mixer.music.stop()
+        main()
+    elif selection.strip().lower()=='info':
+        printCurrentTrack(playList[len(playList)-1])
+    elif selection.strip().lower()=='next':
+        if len(playList) == 0:
+            print "Error: End of playlist"
+        else:
+            pygame.mixer.music.stop()
+            return
+    elif selection.strip().lower()=='up':
+        if volume == 1:
+            print "Error: Max volume"
+        else:
+            setVolume(volume + 0.1)
+            pygame.mixer.music.set_volume(volume)
+            print "Volume: " + str(volume*10)
+        playerInput(playList)
+    elif selection.strip().lower()=='down':
+        if volume == 0:
+            print "Error: Min volume"
+        else:
+            setVolume(volume - 0.1)
+            pygame.mixer.music.set_volume(volume)
+            print "Volume: " + str(volume*10)
+        playerInput(playList)
+    elif selection.strip().lower()=='quit':
+        sys.exit()
+    else:
+        print "Error: Invalid command"
+        playerInput(playList)        
+    return
+
 #getters and setters
 def getArtistTag(pathName):
     artistTag = ID3(pathName).getall('TPE1')
@@ -142,9 +159,6 @@ def getTitleTag(pathName):
     else:
         return ""
 
-def getVolume():
-    return
-
 def setVolume(vol):
     global volume
     if vol>1:
@@ -163,6 +177,13 @@ def printCurrentTrack(pathName):
     print "Current track: " +  artistTag + ", " + titleTag + ", " + genreTag
     return
 
+def printDetailedTrackInfo(pathName):
+    artistTag = getArtistTag(pathName)
+    titleTag = getTitleTag(pathName)
+    genreTag = getGenreTag(pathName)
+    print "Track info: " +  artistTag + ", " + titleTag + ", " + genreTag
+    return
+
 def printPlaylist(playlist):
     print "Playlist:"
     for item in reversed(playlist):
@@ -175,15 +196,19 @@ def printPlaylist(playlist):
 
 
 #main program loop
-while selection.strip().lower() != 'quit':
-    print "Enter command \"select\" to select music preferences, \"play\" to begin to play music, or \"quit\" to exit."
-    selection = raw_input("Please enter command: ")
-    print "You entered ", selection
-    if selection.strip().lower()=='play':
-        play() #plays files which match current criteria
-    elif selection.strip().lower()=='select':
-        select() #allows user to modify current audio generation criteria
-    elif selection.strip().lower()=='quit':
-        pass
-    else:
-        print "Error: Invalid command"
+def main():
+    selection = ""
+    while selection.strip().lower() != 'quit':
+        print "Enter command \"select\" to select music preferences, \"play\" to begin to play music, or \"quit\" to exit."
+        selection = raw_input("Please enter command: ")
+        print "You entered ", selection
+        if selection.strip().lower()=='play':
+            play() #plays files which match current criteria
+        elif selection.strip().lower()=='select':
+            select() #allows user to modify current audio generation criteria
+        elif selection.strip().lower()=='quit':
+            pass
+        else:
+            print "Error: Invalid command"
+
+main()
