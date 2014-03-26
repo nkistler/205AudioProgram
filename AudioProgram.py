@@ -91,6 +91,7 @@ def select():
                     selectedFilePathsSet.add(entry)
     return
 
+#This module is run as the player is playing, and allows for the user to enter commands modifying the playback.
 def playerInput(playList):
     global volume
     selection = ""
