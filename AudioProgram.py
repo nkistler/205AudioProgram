@@ -1,4 +1,7 @@
 #!/usr/bin/python
+
+#Program to randomize the playback of some audio files, based on input from the user. This is meant to provide "jukebox" functionality.
+
 #needed libraries
 import re, os, pygame, random, sys, time 
 from pygame.locals import *
@@ -9,7 +12,7 @@ from mutagen.id3 import ID3
 selectedFilePathsSet= set()
 userArtistList = []
 userGenreList = []
-homeDir = "/home/nathan/Music" #DO NOT include trailing slash
+homeDir = "/home/nathan/Music" #This is where your music directory is set. DO NOT include trailing slash, and DO include full pathname.x
 homeDirList = list()
 selection = ""
 volume = 1
